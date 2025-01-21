@@ -1,16 +1,12 @@
-# flutter_application_1
-
-A new Flutter project.
+# Aqualens
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Our primary development will focus on Android because it is more accessible for those using Windows OSes. That being said, this is not a limiting factor and iOS app development can be done concurrently with Flutter.
 
-A few resources to get you started if this is your first Flutter project:
+Download the following for Android App Development:
+1. [Visual Studio Code](https://code.visualstudio.com/docs/setup).
+2. [The Flutter extension for VS Code](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter).
+3. [Android Studio 2](https://developer.android.com/studio/install) to debug and compile Java or Kotlin code for Android. Flutter requires the full version of Android Studio.
+4. [Git](https://git-scm.com/downloads)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
