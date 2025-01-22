@@ -34,8 +34,7 @@ class FirstRoute extends StatelessWidget {
         child: Column(
           children: [
             const Image(image: AssetImage('assets/logo.png'), width:50),
-            const Text('1.    For the best results, keep your\n hands still or rest your phone on\n something to avoid blurry pictures.'),
-            const Text('2.    ')
+            const Text('1.  For the best results, keep your\n hands still or rest your phone on\n something to avoid blurry\n pictures.\n2.  Try to avoid shadows and\n  reflections.\n3.  Tap on screen to focus\n  properly.'),
             ElevatedButton(
               child: const Text('Open route'),
               onPressed: () {
