@@ -16,13 +16,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      home: const FirstRoute(),
+      home: const TipsPage(),
     );
   }
 }
 
-class FirstRoute extends StatelessWidget {
-  const FirstRoute({super.key});
+class TipsPage extends StatelessWidget {
+  const TipsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,11 +36,11 @@ class FirstRoute extends StatelessWidget {
             const Image(image: AssetImage('assets/logo.png'), width:50),
             const Text('1.  For the best results, keep your\n hands still or rest your phone on\n something to avoid blurry\n pictures.\n2.  Try to avoid shadows and\n  reflections.\n3.  Tap on screen to focus\n  properly.'),
             ElevatedButton(
-              child: const Text('Open route'),
+              child: const Text('Next'),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SecondRoute()),
+                  MaterialPageRoute(builder: (context) => const SamplePage()),
                 );
               },
             ),
@@ -51,8 +51,8 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
-class SecondRoute extends StatelessWidget {
-  const SecondRoute({super.key});
+class SamplePage extends StatelessWidget {
+  const SamplePage({super.key});
 
   @override
   Widget build(BuildContext context) {
