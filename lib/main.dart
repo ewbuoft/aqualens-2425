@@ -70,7 +70,7 @@ class WaterSamplingSourceA extends StatelessWidget {
           children: [
             const Text("Capture an image of the water sampling\nsource. Please ensure the entire tank or\nflush diverter and its surrounding\nenvironment are visible. Frame the scene\nto include both the system and its setting."),
             const Spacer(),
-            const Image(image: AssetImage('assets/image_placeholder.jpg'), width:300),
+            const Image(image: AssetImage('assets/watersystem.png'), width:300),
             const Spacer(),
             ElevatedButton(
             onPressed: () {
@@ -193,7 +193,7 @@ class WaterTapA extends StatelessWidget {
           children: [
             const Text("Please capture a clear image of the water\n tap. Focus closely so that the tap and any\nconnecting fixtures are clearly visible."),
             const Spacer(),
-            const Image(image: AssetImage('assets/image_placeholder.jpg'), width:300),
+            const Image(image: AssetImage('assets/waterpipe.png'), width:300),
             const Spacer(),
             ElevatedButton(
             onPressed: () {
@@ -315,7 +315,7 @@ class RCardTips extends StatelessWidget {
         child: Column(
           children: [
             const Image(image: AssetImage('assets/logo.png'), width:50),
-            const Text(''),
+            const Text('> Put on gloves to keep everything\n clean and safe.\n\n> Open the Testing R-Card and lift\nthe transparent film.\n\n> Using the 1mL pipette, gently put\n1 mL of your selected water\nsample right in the middle of the\ntesting card and cover with the\ntransparent film\n\n> Wait for about 1 minute to let the\nliquid spread evenly across the card.\n\n> Place the card in an incubator. Set\nthe temperature to about 35 \ndegress celsius. Leave it there for\n15 to 24 hours.'),
             const Spacer(flex:2),
             ElevatedButton(
               onPressed: () {
@@ -351,7 +351,7 @@ class RCardA extends StatelessWidget {
           children: [
             const Text("Please take a photo of the R-card after\n24 hours. Make sure the card is in a\nwell-lit area, the grid area is centered\nand fitting in the box, and clearly visible\nfrom the top."),
             const Spacer(),
-            const Image(image: AssetImage('assets/image_placeholder.jpg'), width:300),
+            const Image(image: AssetImage('assets/rcard.png'), width:300),
             const Spacer(),
             ElevatedButton(
             onPressed: () {
