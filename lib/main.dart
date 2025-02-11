@@ -3,7 +3,7 @@ import 'dart:convert'; // For parsing JSON
 import 'package:flutter/services.dart'; // For accessing assets like JSON files
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -16,25 +16,27 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: const Color.fromRGBO(0, 127, 163, 1.0), // Pantone 633
       ),
-      home: LoginPage(),
+      home: const SwipePages(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SwipePages extends StatefulWidget {
+  const SwipePages({super.key});
 
-  @override
-  State<LoginPage> createState() => _LoginPageState();
+  @override 
+  State<SwipePages> createState() => _SwipePagesState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SwipePagesState extends State<SwipePages> {
+  final PageController _pageController = PageController();
 
   String? userInput;
   String? errorMessage;
   List<String> uniqueIds = [];
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -77,7 +79,55 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentPage = index;
+    });
+
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children:<Widget>[
+              _buildLoginPage(),
+              const SignUpPage(),
+
+            ],
+          ),
+          Positioned(
+            bottom: 20,
+            left: MediaQuery.of(context).size.width / 2 - 30,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: List.generate(2, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  height: 10,
+                  width: 10,
+                  decoration: BoxDecoration(
+                    color: _currentPage == index
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey, 
+                  shape: BoxShape.circle,
+                  )
+                );
+              })
+          
+          ,)
+          ,)
+        ]
+      ,),
+    );
+
+  }
+
+  Widget _buildLoginPage() {
     return Scaffold(
       body: Stack(
         //mainAxisSize: MainAxisSize.min,
@@ -105,14 +155,14 @@ class _LoginPageState extends State<LoginPage> {
           Align(
             alignment: Alignment.center,
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32), 
+              padding: const EdgeInsets.symmetric(horizontal: 32), 
               child: TextField(
                 onChanged: (value){
                   userInput = value;
                 },
                 decoration: InputDecoration(
                   hintText: 'Unique ID',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                   errorText: errorMessage,
                 ),
               ),
@@ -152,14 +202,36 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+// Sample SignUpPage for now
+class SignUpPage extends StatelessWidget {
+  const SignUpPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          onPressed: (){
+            // sign up process goes here 
+          },
+          
+          child: const Text('Sign Up'),
+          ),
+      )
+    );
+  }
+}
+
+
+
 // Sample Home Page for Now
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(
+    return const Scaffold(
+      body: Center(
         child: Text('Successful Login !!'),
         ),
       );
