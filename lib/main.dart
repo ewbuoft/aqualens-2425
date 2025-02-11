@@ -202,21 +202,44 @@ class _SwipePagesState extends State<SwipePages> {
   }
 }
 
-// Sample SignUpPage for now
+// SignUpPage for now
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: (){
-            // sign up process goes here 
-          },
-          
-          child: const Text('Sign Up'),
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            //add logo here
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 128),
+                child: Image.asset('assets/logo_with_text.png')
+                ),
+        ),
+        const SizedBox(height: 20), 
+        Text(
+          "Don't have an ID yet? Sign up here: ",
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w500, 
+            fontFamily: 'Verdana',
+            color: Theme.of(context).primaryColor,
+           )),
+        const SizedBox(height: 40),
+        const TextField(
+          decoration: InputDecoration(
+            labelText: 'Name',
+            border: OutlineInputBorder(),
+
+          ),),
+        ])
+        ,
       )
     );
   }
