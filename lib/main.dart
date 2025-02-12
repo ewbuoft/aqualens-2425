@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert'; // For parsing JSON
 import 'package:flutter/services.dart'; // For accessing assets like JSON files
+import 'package:time/time.dart';
 
 void main() {
   runApp(const MyApp());
@@ -203,8 +204,21 @@ class _SwipePagesState extends State<SwipePages> {
 }
 
 // SignUpPage for now
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  String? generatedId;
+  String? name;
+
+  void _generateUniqueId() {
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -214,33 +228,79 @@ class SignUpPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            //add logo here
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.only(top: 128),
-                child: Image.asset('assets/logo_with_text.png')
+                child: Image.asset('assets/logo.png'),
+              ),
+            ),
+            const SizedBox(height: 60),
+            Text(
+              "Don't have an ID yet? Sign up here:",
+              style: TextStyle(
+                fontSize: 18,
+                //fontWeight: FontWeight.w500,
+                fontFamily: 'Verdana',
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(height: 45),
+            TextField(
+              onChanged: (value){
+                name = value;
+              },
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: 'First & Last Name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            // const SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: _generateUniqueId,
+            //   child: const Text("Generate Unique ID"),
+            // ),
+            // const SizedBox(height: 10),
+            // if (generatedId != null)
+            //   Text(
+            //     "Generated ID: $generatedId",
+            //     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            //   ),
+            // const SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: _registerUser,
+            //   child: const Text("Register"),
+            // ),
+            Align(
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20),
+                
+              child: ElevatedButton( 
+                onPressed: _generateUniqueId,
+                  
+                  // Navigator.pushReplacement(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => const HomePage())
+                  // );
+              //On pressed currently skips straight to homepage
+              
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+                child: const Text('Register'),
                 ),
-        ),
-        const SizedBox(height: 20), 
-        Text(
-          "Don't have an ID yet? Sign up here: ",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500, 
-            fontFamily: 'Verdana',
-            color: Theme.of(context).primaryColor,
-           )),
-        const SizedBox(height: 40),
-        const TextField(
-          decoration: InputDecoration(
-            labelText: 'Name',
-            border: OutlineInputBorder(),
 
-          ),),
-        ])
-        ,
-      )
+              ),
+            
+            
+            )
+          ],
+        ),
+      ),
     );
   }
 }
