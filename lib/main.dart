@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
 
+import 'package:aqualens/pages/login.dart';
+export 'package:aqualens/main.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+class Destination {
+  const Destination(this.label, this.icon, this.selectedIcon);
+
+  final String label;
+  final Widget icon;
+  final Widget selectedIcon;
+}
+
+const List<Destination> destinations = <Destination>[
+  Destination('Home', Icon(Icons.home_outlined), Icon(Icons.home_filled)),
+  Destination('Login', Icon(Icons.account_circle_outlined), Icon(Icons.account_circle)),
+  Destination('Settings', Icon(Icons.settings_outlined), Icon(Icons.settings)),
+];
 
 
 class MyApp extends StatelessWidget {
@@ -14,136 +28,190 @@ class MyApp extends StatelessWidget {
 @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login Page',
+      title: 'CGEN Aqualens',
       theme: ThemeData(
-        primaryColor: const Color.fromRGBO(0, 127, 163, 1.0), // Pantone 633
+        useMaterial3: true,
+        
+        colorScheme: const ColorScheme (
+          brightness: Brightness.light, 
+          primary:  Color.fromRGBO(0, 127, 163, 1.0), 
+          onPrimary: Colors.white, 
+          secondary: Color.fromRGBO(111, 199, 234, 1.0), 
+          onSecondary: Colors.black, 
+          error: Color.fromRGBO(220, 70, 51, 1.0), 
+          onError: Colors.white, 
+          surface: Colors.white, 
+          onSurface: Colors.black)
       ),
-      home: const LoginPage(),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        
+        colorScheme: const ColorScheme (
+          brightness: Brightness.light, 
+          primary:  Color.fromRGBO(0, 127, 163, 1.0), 
+          onPrimary: Colors.white, 
+          secondary: Color.fromRGBO(111, 199, 234, 1.0), 
+          onSecondary: Colors.black, 
+          error: Color.fromRGBO(220, 70, 51, 1.0), 
+          onError: Colors.white, 
+          surface: Colors.black, 
+          onSurface: Colors.white)
+      ),
+      home: const HomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+
+
+class InfoPage extends StatelessWidget {
+  const InfoPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _idController = TextEditingController();
-  List<String> _validIds = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadIds();
-  }
-
-Future<void> _loadIds() async {
-  final String data = await rootBundle.loadString('assets/ids.json');
-  final Map<String, dynamic> jsonResult = json.decode(data);
-  setState(() {
-    _validIds = List<String>.from(jsonResult['ids']);
-
-  });
-  print('Loaded IDs: $_validIds');
-}
-
-
-void _handleLogin() {
-    final String enteredId = _idController.text.trim();
-    print('Entered ID: $enteredId');
-    print('Valid IDs: $_validIds');
-    if (_validIds.contains(enteredId)) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid ID. Please try again.')),
-      );
-    }
-  }
-
-@override
   Widget build(BuildContext context) {
+
+    return const Center(
+      child: 
+        Padding(
+          padding: EdgeInsets.all(20),
+          child: Text("Here's some info."
+          ),
+        ),
+      
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  int screenIndex = 0;
+  late bool showNavigationDrawer;
+
+  Widget page = const InfoPage();
+
+  void handleScreenChanged(int selectedScreen) {
+    setState(() {
+      screenIndex = selectedScreen;
+    });
+    scaffoldKey.currentState!.closeEndDrawer();
+  }
+
+  void openDrawer() {
+    scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  Widget buildBottomBarScaffold() {
     return Scaffold(
-      body: Stack(
-        //mainAxisSize: MainAxisSize.min,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            page
+          ],
+        ),
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: screenIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            screenIndex = index;
+          });
+        },
+        destinations:
+            destinations.map((Destination destination) {
+              return NavigationDestination(
+                label: destination.label,
+                icon: destination.icon,
+                selectedIcon: destination.selectedIcon,
+                tooltip: destination.label,
+              );
+            }).toList(),
+      ),
+    );
+  }
+
+  Widget buildDrawerScaffold(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 75.0,
+          title: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: SizedBox(
+            width: 40.0,
+            child: Image.asset('assets/logo.png'),
+          ),
+        ) ,
+      ),
+      key: scaffoldKey,
+      body: SafeArea(
+        child: Row(
+          children: <Widget>[
+            const VerticalDivider(thickness: 1, width: 1),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Center(
+                    child: page,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      endDrawer: NavigationDrawer(
+        onDestinationSelected: handleScreenChanged,
+        selectedIndex: screenIndex,
         children: <Widget>[
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 128),
-              child: Image.asset('assets/logo_with_text.png'),
-            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
+            child: Text('Menu', style: Theme.of(context).textTheme.titleLarge),
           ),
-
-          Positioned(
-            top: 360,
-            left: MediaQuery.of(context).size.width / 2 - 90,
-            child: Text(
-              'Put Your Unique ID Here: ',
-              style: TextStyle(
-              fontSize: 18,
-              fontFamily: 'Verdana',
-              color: Theme.of(context).primaryColor, 
-              ),
-          ),
-      ),     
-          Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32), 
-              child: TextField(
-                controller: _idController,
-                decoration: const InputDecoration(
-                  hintText: 'Unique ID',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-          ),
-
-          Align(
-            alignment: Alignment.center,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 140),
-              
-            child: ElevatedButton( 
-              onPressed: _handleLogin,
-              style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-             ),
-              child: const Text('Enter'
-                 ),
-              ),
-
-            ),
-          
-          
-          )
+          ...destinations.map((Destination destination) {
+            return NavigationDrawerDestination(
+              label: Text(destination.label),
+              icon: destination.icon,
+              selectedIcon: destination.selectedIcon,
+            );
+          }),
+          const Padding(padding: EdgeInsets.fromLTRB(28, 16, 28, 10), child: Divider()),
         ],
       ),
     );
   }
-} 
 
-// Sample Home Page for Now
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Successful Login !!'),
-        ),
-      );
+    switch (screenIndex) {
+      case 0:
+        page = const InfoPage();
+        break;
+      case 1:
+        page = const LoginPage();
+        break;
+      case 2:
+        page = const InfoPage();
+        break;
+      default:
+        throw UnimplementedError('no widget');
+    }
+
+    return showNavigationDrawer ? buildDrawerScaffold(context) : buildBottomBarScaffold();
   }
 }
