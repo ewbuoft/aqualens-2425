@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // For parsing JSON
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart'; // For accessing assets like JSON files
-import 'package:time/time.dart';
+import 'package:path_provider/path_provider.dart';
+
+
 
 void main() {
   runApp(const MyApp());
@@ -36,49 +39,83 @@ class _SwipePagesState extends State<SwipePages> {
 
   String? userInput;
   String? errorMessage;
-  List<String> uniqueIds = [];
+  List<Map<String, dynamic>> jsonData = [];
   int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    // Load the unique IDs when the app starts
-    _loadUniqueIds();
+    _loadUniqueIds(); // Load JSON data when the app starts
   }
 
+
   // Function to load unique IDs from the JSON file
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/ids.json');
+  }
+
+  Future<void> _initializeJsonFile() async {
+    final file = await _getLocalFile();
+    bool fileExists = await file.exists();
+
+    if (!fileExists) {
+      String jsonString = await rootBundle.loadString('assets/ids.json');
+      await file.writeAsString(jsonString);
+    }
+  }
+
   Future<void> _loadUniqueIds() async {
-    // Load the JSON file from assets
-    String jsonString = await rootBundle.loadString('assets/ids.json');
-    // Parse the JSON and extract the unique IDs
-    List<dynamic> jsonData = json.decode(jsonString);
-    // Save the IDs into the `_uniqueIds` list
+    await _initializeJsonFile();
+    final file = await _getLocalFile();
+    String contents = await file.readAsString();
+    List<dynamic> jsonList = json.decode(contents);
     setState(() {
-      uniqueIds = jsonData.map((item) => item['id'].toString()).toList();
+      jsonData = jsonList.map((item) => item as Map<String, dynamic>).toList();
     });
   }
-  void _validateAndLogin() {
+
+  Future<void> _writeJson(List<dynamic> jsonList) async {
+    final file = await _getLocalFile();
+    await file.writeAsString(json.encode(jsonList));
+  }
+
+  void _validateAndLogin() async {
     if (userInput == null || userInput!.isEmpty) {
-      // Input is empty
       setState(() {
         errorMessage = "Unique ID cannot be empty!";
       });
-    } else if (!uniqueIds.contains(userInput)) {
-      // Input is invalid
+      return;
+    }
+
+    // ✅ Reload the JSON from the local file
+    await _loadUniqueIds();
+
+    // Find the user based on the updated list
+    Map<String, dynamic>? userJson = jsonData.firstWhere(
+      (item) => item['id'] == userInput,
+      orElse: () => {},
+    );
+
+    print(userJson); // Debug: See if the user exists
+
+    if (userJson.isEmpty) {
       setState(() {
         errorMessage = "Invalid Unique ID!";
       });
     } else {
-      // Input is valid; navigate to the home page
       setState(() {
-        errorMessage = null; // Clear error message
+        errorMessage = null;
       });
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(
+          builder: (context) => HomePage(userJson: userJson),
+        ),
       );
     }
   }
+
 
   void _onPageChanged(int index) {
     setState(() {
@@ -210,15 +247,86 @@ class SignUpPage extends StatefulWidget {
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
+
+
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
   String? generatedId;
+  String? errorMessage;
   String? name;
 
-  void _generateUniqueId() {
-
+  Future<File> _getLocalFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/ids.json');
   }
+
+  Future<List<dynamic>> _readJson() async {
+    final file = await _getLocalFile();
+    String contents = await file.readAsString();
+    return json.decode(contents);
+  }
+
+  Future<void> _writeJson(List<dynamic> jsonList) async {
+    final file = await _getLocalFile();
+    await file.writeAsString(json.encode(jsonList));
+  }
+
+void _generateUniqueId() async {
+  String fullName = _nameController.text.trim();
+
+  if (fullName.isEmpty || !fullName.contains(' ')) {
+    setState(() {
+      errorMessage = "Please enter both first and last names.";
+    });
+    return;
+  }
+
+  // Split the full name into first and last names
+  List<String> nameParts = fullName.split(' ');
+  String firstName = nameParts.first;
+  String lastName = nameParts.last;
+
+  // Extract first 3 letters from the last name
+  String lastNamePart;
+  if (lastName.length >= 3) {
+    lastNamePart = lastName.substring(0, 3).toUpperCase();
+  } else {
+    lastNamePart = lastName.toUpperCase().padRight(3, 'X');
+  }
+
+  // Get current month and year
+  DateTime now = DateTime.now();
+  String monthYearPart =
+      "${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}"; // MMYY format
+
+  // ✅ Load existing users from local file (NOT assets)
+  List<dynamic> jsonList = await _readJson();
+
+  // Calculate the next client number
+  int clientNumber = jsonList.length + 1;
+  String clientNumberPart = clientNumber.toString().padLeft(3, '0'); // 3-digit
+
+  // Combine all parts to create the unique ID
+  String uniqueId = "$lastNamePart$monthYearPart$clientNumberPart";
+
+  setState(() {
+    generatedId = uniqueId;
+    errorMessage = null; // Clear error message on success
+  });
+
+  // Add new user to the JSON list
+  Map<String, dynamic> newUser = {
+    "id": uniqueId,
+    "name": fullName,
+  };
+
+  jsonList.add(newUser);
+
+  // ✅ Write updated list to local file
+  await _writeJson(jsonList);
+
+  print("New User Added: $newUser");
+}
 
   @override
   Widget build(BuildContext context) {
@@ -247,57 +355,30 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             const SizedBox(height: 45),
             TextField(
-              onChanged: (value){
-                name = value;
-              },
               controller: _nameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'First & Last Name',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                errorText: errorMessage, // Show error message here
               ),
             ),
-            // const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: _generateUniqueId,
-            //   child: const Text("Generate Unique ID"),
-            // ),
-            // const SizedBox(height: 10),
-            // if (generatedId != null)
-            //   Text(
-            //     "Generated ID: $generatedId",
-            //     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            //   ),
-            // const SizedBox(height: 20),
-            // ElevatedButton(
-            //   onPressed: _registerUser,
-            //   child: const Text("Register"),
-            // ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20),
-                
-              child: ElevatedButton( 
-                onPressed: _generateUniqueId,
-                  
-                  // Navigator.pushReplacement(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const HomePage())
-                  // );
-              //On pressed currently skips straight to homepage
-              
+            const SizedBox(height: 20),
+
+            if (generatedId != null)
+              Text(
+                "Generated ID: $generatedId",
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green),
+              ),
+
+            ElevatedButton(
+              onPressed: _generateUniqueId,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
               ),
-                child: const Text('Register'),
-                ),
-
-              ),
-            
-            
-            )
+              child: const Text('Register'),
+            ),
           ],
         ),
       ),
@@ -309,14 +390,16 @@ class _SignUpPageState extends State<SignUpPage> {
 
 // Sample Home Page for Now
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final Map<String, dynamic> userJson;
+
+  const HomePage({super.key, required this.userJson});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
-        child: Text('Successful Login !!'),
-        ),
-      );
+        child: Text('Welcome, ${userJson['name']}!'),
+      ),
+    );
   }
 }
