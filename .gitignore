@@ -50,4 +50,5 @@ backend/venv/
 backend/.env
 backend/__pycache__/
 backend/instance/
+backend/*.jpg
 
