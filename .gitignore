@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Ignore backend virtual environment
+backend/venv/
+backend/.env
+backend/__pycache__/
+backend/instance/
+
