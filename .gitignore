@@ -51,4 +51,5 @@ backend/.env
 backend/__pycache__/
 backend/instance/
 backend/*.jpg
+backend/water_analysis.py
 
