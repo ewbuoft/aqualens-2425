@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter_application_1/services/google_drive_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,60 +17,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      home: DriveUploadTest(),
+      home: const TipsPage(),
     );
   }
 }
-
-// Google Drive Test:
-class DriveUploadTest extends StatefulWidget {
-  @override
-  _DriveUploadTestState createState() => _DriveUploadTestState();
-}
-
-class _DriveUploadTestState extends State<DriveUploadTest> {
-  final GoogleDrive _googleDrive = GoogleDrive();
-
-  Future<void> _pickAndUploadFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    print("test");
-
-    if (result != null && result.files.single.path != null) {
-      File file = File(result.files.single.path!);
-      try {
-        print("Uploading");
-        await _googleDrive.uploadFileToGoogleDrive(file);
-        print("After");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File uploaded successfully!')),
-        );
-      } catch (e) {
-        print("Failed to Upload");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload file: $e')),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No file selected')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Google Drive Upload Test')),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: _pickAndUploadFile,
-          child: Text('Pick File and Upload'),
-        ),
-      ),
-    );
-  }
-}
-
 
 class TipsPage extends StatelessWidget {
   const TipsPage({super.key});
