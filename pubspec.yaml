@@ -97,3 +97,7 @@ flutter:
     - assets/logo.png
     - assets/logo_with_text.png
     - assets/ids.json
+    - assets/waterpipe.png
+    - assets/watersystem.png
+    - assets/rcard.png
+    - assets/image_placeholder.jpg
