@@ -1,3 +1,11 @@
-{
-    "ids": ["hello", "testing1", "abc"]
-}
+[
+    { "id": "SAR0125001",
+      "name": "Prof Sarker"
+    },
+    { "id": "RAH0225002",
+      "name": "Dr Rahman"
+    },
+    { "id": "ALI0325003",
+      "name": "Ali"
+    }
+]
