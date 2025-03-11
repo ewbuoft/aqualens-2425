@@ -1,5 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'login_and_signup.dart';
+// import 'camera_pages/tips_page.dart';
 
 import 'package:aqualens/pages/login.dart';
 export 'package:aqualens/main.dart';
@@ -26,7 +28,7 @@ const List<Destination> destinations = <Destination>[
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-@override
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'CGEN Aqualens',
