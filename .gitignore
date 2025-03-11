@@ -53,3 +53,4 @@ backend/instance/
 backend/*.jpg
 backend/water_analysis.py
 
+.qodo
