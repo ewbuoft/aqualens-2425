@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart'; // For accessing assets like JSON files
 import 'package:path_provider/path_provider.dart';
+import 'welcome_page.dart';
 
 class SwipePages extends StatefulWidget {
   const SwipePages({super.key});
@@ -87,7 +88,7 @@ class _SwipePagesState extends State<SwipePages> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(userJson: userJson),
+          builder: (context) => WelcomePage(userJson: userJson), //userJson: userJson
         ),
       );
     }
@@ -358,24 +359,6 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-
-
-// Sample Home Page for Now
-class HomePage extends StatelessWidget {
-  final Map<String, dynamic> userJson;
-
-  const HomePage({super.key, required this.userJson});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text('Welcome, ${userJson['name']}!'),
       ),
     );
   }
