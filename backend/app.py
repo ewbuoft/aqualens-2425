@@ -5,12 +5,15 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from flask_cors import CORS
+
 
 load_dotenv()  # Load environment variables from .env file
 
 
 # Initialize Flask App
 app = Flask(__name__)
+CORS(app) 
 
 # Database Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
