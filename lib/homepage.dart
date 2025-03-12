@@ -142,10 +142,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
                 margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: (Theme.of(context).brightness == Brightness.dark
-                      ? Colors.black
-                      : Colors.white)
-                      .withOpacity(_current == entry.key ? 0.9 : 0.4),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(_current == entry.key ? 0.9 : 0.4),
                 ),
               ),
             );
