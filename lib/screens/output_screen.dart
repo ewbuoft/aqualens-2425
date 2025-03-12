@@ -27,7 +27,7 @@ class _WaterQualityOutputScreenState extends State<WaterQualityOutputScreen> {
   Future<void> _loadTestImageFromAssets() async {
     print("📥 Loading test image from assets (web-friendly)...");
     try {
-      final byteData = await rootBundle.load('assets/test_sample-2.jpg');
+      final byteData = await rootBundle.load('assets/test_sample-3.jpg');
       setState(() {
         testImageBytes = byteData.buffer.asUint8List();
       });
@@ -61,22 +61,28 @@ class _WaterQualityOutputScreenState extends State<WaterQualityOutputScreen> {
       setState(() {
         colonyCount = result["colony_count"];
         riskLevel = result["risk_level"].toUpperCase();
-        // Dynamically set the description
+
+        // Dynamically set the description based on risk level
         if (riskLevel == "SAFE") {
-          description = "Your water meets WHO standards (0 colonies per 100 mL).";
+          description =
+              "This sample meets WHO standards (0 colonies per 100 mL). Regular maintenance is recommended, but no immediate action is required.";
         } else if (riskLevel == "LOW") {
-          description = "The bacterial contamination is low, but you may still want to treat the water.";
+          description =
+              "Bacterial contamination is present but still considered low-risk. WHO guidelines suggest ensuring basic water treatment and good hygiene practices to maintain safety.";
         } else if (riskLevel == "MEDIUM") {
-          description = "This level of contamination may pose health risks without treatment.";
+          description =
+              "This level of contamination can pose a health risk if untreated. WHO recommends proper disinfection (e.g., boiling, chlorination, filtration) before use.";
         } else if (riskLevel == "HIGH") {
-          description = "This level of contamination exceeds WHO standards. Treatment is strongly recommended.";
+          description =
+              "Significant contamination found. This exceeds WHO’s safe threshold (0 colonies per 100 mL). Do not drink without thorough treatment and inspect your rainwater system for possible contamination sources.";
         }
+
         riskColor = (riskLevel == "SAFE")
-            ? Colors.green
+            ? Colors.lightBlueAccent
             : (riskLevel == "LOW")
-                ? Colors.blue
+                ? Colors.green
                 : (riskLevel == "MEDIUM")
-                    ? Colors.orange
+                    ? Colors.yellow
                     : Colors.red;
         isLoading = false;
       });
