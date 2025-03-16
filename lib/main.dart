@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lluvia_lens/services/api_service.dart';
 import 'login_and_signup.dart';
 // import 'camera_pages/tips_page.dart';
 
-void main() {
+Future<void> main() async {
   runApp(const MyApp());
 }
 

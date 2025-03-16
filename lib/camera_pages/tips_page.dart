@@ -13,8 +13,21 @@ class TipsPage extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            const Image(image: AssetImage('assets/logo.png'), width:50),
-            const Text('1.  For the best results, keep your\n     hands still or rest your phone on\n     something to avoid blurry\n     pictures.\n2.  Try to avoid shadows and\n     reflections.\n3.  Tap on screen to focus\n     properly.'),
+            const Image(
+                image: AssetImage('assets/logo.png'),
+                width: 100
+            ),
+
+            const Spacer(flex:1),
+            const Padding(
+              padding: EdgeInsets.only(top: 18, left: 20, right: 20), // 18 top, 20 left and right padding
+              child: Text(
+                '1. For the best results, keep your hands still or rest your phone on something to avoid blurry pictures.\n\n2. Try to avoid shadows and reflections.\n\n3. Tap on screen to focus properly.',
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 20), // Adjusted font size
+              ),
+            ),
+
             const Spacer(flex:2),
             ElevatedButton(
               onPressed: () {

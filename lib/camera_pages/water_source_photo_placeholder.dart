@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'water_sampling_source_b.dart';
 
 class WaterSourcePhotoPlaceHolder extends StatelessWidget {
-  const WaterSourcePhotoPlaceHolder({super.key});
+  final String imagePath;
+  const WaterSourcePhotoPlaceHolder({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
