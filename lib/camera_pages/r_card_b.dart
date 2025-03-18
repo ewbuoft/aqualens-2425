@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'r_card_tips.dart';
 import 'r_card_a.dart';
 import 'package:lluvia_lens/output_screen.dart';
 
@@ -29,7 +28,10 @@ class RCardB extends StatelessWidget {
             // Display captured image if available, otherwise show placeholder
             imagePath != null
                 ? Image.file(File(imagePath!))
-                : const Image(image: AssetImage('assets/image_placeholder.jpg'), width: 300),
+                : const Image(
+              image: AssetImage('assets/image_placeholder.jpg'),
+              width: 300,
+            ),
 
             const Spacer(),
             Row(
@@ -37,16 +39,21 @@ class RCardB extends StatelessWidget {
                 const Spacer(flex: 2),
                 ElevatedButton(
                   onPressed: () {
+                    // Process the image by navigating to the output screen,
+                    // passing the captured image path
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const RCardTips()),
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            WaterQualityOutputScreen(imagePath: imagePath),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 0, 127, 163),
                   ),
                   child: const Text(
-                    'Happy!',
+                    'Process!',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -68,27 +75,6 @@ class RCardB extends StatelessWidget {
                 ),
                 const Spacer(flex: 2),
               ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: imagePath != null
-                  ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    // builder: (context) => WaterQualityOutputScreen(imagePath: imagePath!),
-                      builder: (context) => WaterQualityOutputScreen(),
-                  ),
-                );
-              }
-                  : null, // Disable if no image is present
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-              ),
-              child: const Text(
-                'Process Image',
-                style: TextStyle(color: Colors.white),
-              ),
             ),
             const Spacer(),
           ],

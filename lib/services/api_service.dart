@@ -3,36 +3,38 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "http://127.0.0.1:5000"; // or your Flask URL
+  static const String baseUrl = "http://10.0.2.2:5000";
 
+  // Analyzes image using memory-based bytes and userId
   static Future<Map<String, dynamic>?> analyzeImageFromBytes(Uint8List imageBytes, String userId) async {
     try {
-      print("📤 Preparing memory-based image request to API...");
+      print("📤 Sending image to API for analysis...");
 
-      // Create a multipart request
+      // Prepare multipart request
       var request = http.MultipartRequest('POST', Uri.parse("$baseUrl/analyze"));
 
-      // Add the user_id field
+      // Add the user_id as a form field
       request.fields['user_id'] = userId;
 
-      // Add the image as bytes (web-compatible)
-      request.files.add(
-        http.MultipartFile.fromBytes('file', imageBytes, filename: 'test.jpg'),
-      );
+      // Add image as bytes (using a filename that is generic for API compatibility)
+      request.files.add(http.MultipartFile.fromBytes('file', imageBytes, filename: 'water_sample.jpg'));
 
       // Send the request
       var response = await request.send();
-      print("📬 Response status: ${response.statusCode}");
 
+      // Check status code
       if (response.statusCode == 200) {
         final responseBody = await response.stream.bytesToString();
         print("✅ API Response: $responseBody");
+
+        // Decode JSON response
         return jsonDecode(responseBody);
       } else {
-        print("❌ API Error: ${response.statusCode}");
+        print("❌ API Error: Status Code ${response.statusCode}, ${response.reasonPhrase}");
         return null;
       }
     } catch (e) {
+      // Handle errors (e.g., no connection, timeout, or JSON parsing issues)
       print("⚠️ Exception in API request: $e");
       return null;
     }

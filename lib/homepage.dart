@@ -20,7 +20,7 @@ const List<Destination> destinations = <Destination>[
 
 // --- InfoPage & Carousel ---
 class InfoPage extends StatelessWidget {
-  const InfoPage({Key? key}) : super(key: key);
+  const InfoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,7 @@ final List<Widget> sliderContent = [
 ];
 
 class CarouselWithIndicatorDemo extends StatefulWidget {
-  const CarouselWithIndicatorDemo({Key? key}) : super(key: key);
+  const CarouselWithIndicatorDemo({super.key});
 
   @override
   State<CarouselWithIndicatorDemo> createState() => _CarouselWithIndicatorState();
@@ -155,7 +155,7 @@ class _CarouselWithIndicatorState extends State<CarouselWithIndicatorDemo> {
 
 // --- HomePage with Modified Navigation ---
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();

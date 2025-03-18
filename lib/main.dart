@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lluvia_lens/services/api_service.dart';
 import 'login_and_signup.dart';
-// import 'camera_pages/tips_page.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
@@ -51,7 +49,6 @@ class MyApp extends StatelessWidget {
 // import 'package:flutter/material.dart';
 // import 'login_and_signup.dart';
 // // import 'camera_pages/tips_page.dart';
-// import 'screens/output_screen.dart'; // Import the output screen
 
 // void main() {
 //   runApp(const MyApp());

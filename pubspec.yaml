@@ -117,4 +117,8 @@ flutter:
     - assets/test_sample.jpg
     - assets/test_sample-2.jpg
     - assets/test_sample-3.jpg
+    - assets/test_rcard.png
+    - assets/test_rcard2.jpg
+    - assets/R-cardSample1.jpg
+    - assets/R-cardSample2.jpg
 

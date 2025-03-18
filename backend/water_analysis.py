@@ -1,158 +1,177 @@
-# Import Libraries
-
-#!pip install tqdm
-from tqdm import tqdm
-import time
-import cv2
 import numpy as np
-# from google.colab.patches import cv2_imshow
-import matplotlib.pyplot as plt
-
-
-# Prompt the user for data
-# The filename is as such [SOURCE: Tlaloque (TLQ), Tank (TNK), Tap (TAP), Filter (FTR)]_[CLIENT ID]_[DATE],
-# i.e., TLQ_0001_180823 means: Client ID: 0001, Water Source: Tlaloque, and Filename: TLQ_0001_180823.jpg
-client_ID = "01"
-water_source = "Tlaloque"
-# filename = input("Please enter file name (with .jpg): ")
-# filename = "TAP_0001_180823.jpg"
-# filename = "TLQ_0001_180823.jpg"
-filename = "TNK_0001_180823.jpg"
-
-# Load the image
-original_image = cv2.imread(filename)
-# Optional (Required in this case)
-crop_h = 330
-crop_w = 50
-image = original_image[crop_h:, crop_w:-crop_w]
-#image = original_image.copy()
-# Convert the image to the HSV color space (Hue, Saturation, Value)
-hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-# Display Pairwise
-plt.figure(figsize=(12,6))
-plt.subplot(1,2,1), plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), plt.title('Original'), plt.axis('off')
-plt.subplot(1,2,2), plt.imshow(cv2.cvtColor(hsv_image, cv2.COLOR_BGR2RGB)), plt.title('HSV'), plt.axis('off')
-plt.show()
-
-# Identifying Bacterial Colony Color
+import cv2 as cv
+import base64
+import io
+import plotly.express as px
 
 def identify_target_color(color_list, target_hue):
-    # Calculate the difference in hue for each color in the list
     hue_diff = np.abs(color_list[:, 0] - target_hue)
-    # Find the index of the color with the smallest hue difference
     target_index = np.argmin(hue_diff)
-
     return color_list[target_index]
 
-# Get all colors in the hsv image
-unique_colors = np.unique(hsv_image.reshape(-1, hsv_image.shape[2]), axis=0)
+def BlueMask(image, hue_tolerance=75):
+    hsv_image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    unique_colors = np.unique(hsv_image.reshape(-1, hsv_image.shape[2]), axis=0)
+    target_color = identify_target_color(unique_colors, 100)
+    hue = int(target_color[0])
+    sat = int(target_color[1])
+    lower_hue = max(0, hue - hue_tolerance)
+    upper_hue = min(179, hue + int(hue_tolerance * 0.2))
+    lower_target = np.array([lower_hue, abs(sat - 50), 0])
+    upper_target = np.array([upper_hue, 230, 235])
+    blue_mask = cv.inRange(hsv_image, lower_target, upper_target)
+    return blue_mask
 
-# Automatically choose the target color from the list
-target_color = identify_target_color(unique_colors, 100)
+# --- Colony Counting Functions ---
+def Confirmed_Blue_Colonies(image, hue_tolerance=75, contour_threshold=2):
+    blue_mask = BlueMask(image, hue_tolerance=hue_tolerance)
+    contours, _ = cv.findContours(blue_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    counter = 0
+    areas = []
+    marked_img = image.copy()
+    for contour in contours:
+        area = cv.contourArea(contour)
+        perimeter = cv.arcLength(contour, True)
+        circularity = 4 * np.pi * (area / (perimeter * perimeter)) if perimeter > 0 else 0
+        if area > contour_threshold and circularity > 0.32:
+            x, y, w, h = cv.boundingRect(contour)
+            cv.rectangle(marked_img, (x-1, y-1), (x+w+1, y+h+1), (10, 0, 255), 1)
+            counter += 1
+            areas.append(area)
+    return counter, areas, marked_img
 
-# Define the upper and lower bounds for the chosen blue color
-hue_tolerance = 65  # Tolerance for hue variation
-lower_target = np.array([target_color[0] - hue_tolerance, np.absolute(target_color[1] - 50), 0])
-upper_target = np.array([target_color[0] + int(hue_tolerance*0.2), 230, 235])
-print(lower_target)
-print(upper_target)
+def Other_Blob_Count(image, th_param, bounds, hue_tolerance=75):
+    blue_mask = BlueMask(image, hue_tolerance=hue_tolerance)
+    gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    clahe = cv.createCLAHE(clipLimit=3, tileGridSize=(3, 3))
+    gray_cl = clahe.apply(gray)
+    inverted_blue_mask = cv.bitwise_not(blue_mask)
+    final_mask = cv.bitwise_and(gray_cl, gray_cl, mask=inverted_blue_mask)
+    blur = cv.GaussianBlur(final_mask, (5, 5), 0)
+    kernel_size = (5, 5)
+    eroded = cv.erode(blur, np.ones(kernel_size, np.uint8))
+    _ , _ = cv.threshold(eroded, th_param[0], th_param[1], cv.THRESH_BINARY_INV | cv.THRESH_OTSU)
+    th2 = cv.adaptiveThreshold(blur, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C,
+                               cv.THRESH_BINARY_INV, 15, 11)
+    contours, _ = cv.findContours(th2, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+    filtered_contours = []
+    areas = []
+    marked_img = image.copy()
+    for cnt in contours:
+        area = cv.contourArea(cnt)
+        for bound in bounds:
+            if area >= bound[0] and area <= bound[1]:
+                perimeter = cv.arcLength(cnt, True)
+                circularity = (4 * np.pi * area) / (perimeter * perimeter) if perimeter > 0 else 0
+                if circularity >= 0.32:
+                    filtered_contours.append(cnt)
+                    # Draw yellow rectangle for bound [2, 20]
+                    if bound[0] == 2 and bound[1] == 20:
+                        x, y, w, h = cv.boundingRect(cnt)
+                        cv.rectangle(marked_img, (x, y), (x + w, y + h), (0, 165, 255), 1)
+                        areas.append(area)
+    count = int(np.mean([len(filtered_contours)]))
+    return count, areas, marked_img
 
-# Define the lower and upper HSV threshold values for blue color
-# Adjust these values based on your specific shade of blue
-# lower_blue = np.array([34, 20, 25])
-# upper_blue = np.array([130, 215, 235])
+# --- Image Processing ---
+def process_image_from_image(img, selected_option, resize, target_height=800):
+    if resize:
+        width = int(img.shape[1] * (target_height / img.shape[0]))
+        image = cv.resize(img, (width, target_height), interpolation=cv.INTER_AREA)
+    else:
+        image = img.copy()
 
-# lower_blue = np.array([30, 25, 40])
-# upper_blue = np.array([150, 235, 235])
+    h, w, _ = image.shape
+    crop_fraction = 0.8
+    side_length = int(min(w, h) * crop_fraction)
+    x = (w - side_length) // 2
+    y = (h - side_length) // 2
+    cropped = image[y:y + side_length, x:x + side_length]
 
-# Create a mask to extract blue regions since we know that the bacterial colonies will be blue
-blue_mask = cv2.inRange(hsv_image, lower_target, upper_target)
+    if selected_option == 'Confirmed_Blue_Colonies':
+        count, areas, output_img = Confirmed_Blue_Colonies(cropped)
+        return cropped, output_img, count, areas
 
-# Find contours in the mask
-contours, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-counter = 0
-marked_img = image.copy()
-# Iterate through the detected contours
-for contour in tqdm(contours, desc = 'Processing ...'):
-  # Calculate the area of each contour
-  area = cv2.contourArea(contour)
-  # Set a minimum threshold for contour area to filter out noise
-  if area > 5:  # Adjust this threshold as needed
-    # Draw a bounding box around the detected blue region
-    x, y, w, h = cv2.boundingRect(contour)
-    cv2.rectangle(marked_img, (x-2, y-2), (x + w+2, y + h+2), (10, 0, 255), 6)
-    counter = counter+1
-  time.sleep(0.01)
-print(f'\nThe total number of colonies is:', counter)
+    elif selected_option == 'Other_Blob_Count':
+        count, areas, output_img = Other_Blob_Count(cropped, [175, 255], [[2, 20]])
+        return cropped, output_img, count, areas
 
-# Display the original image with blue regions highlighted
-plt.figure(figsize=(12,6))
-plt.subplot(1,2,1), plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), plt.title('Original'), plt.axis('off')
-plt.subplot(1,2,2), plt.imshow(cv2.cvtColor(marked_img, cv2.COLOR_BGR2RGB)), plt.title('Colonies Identified'), plt.axis('off')
-plt.show()
+    else:  # BOTH
+        count_CBC, areas_CBC, output_CBC = Confirmed_Blue_Colonies(cropped)
+        count_OBC, areas_OBC, output_OBC = Other_Blob_Count(cropped, [175, 255], [[2, 20]])
+        total_count = count_CBC + count_OBC
+        total_areas = areas_CBC + areas_OBC
+        return cropped, output_CBC, output_OBC, total_count, total_areas
 
-# Display the original image with bacterial colonies highlighted and number of colonies marked
-# Define the text with the variable
-cntext = f'Total E. Coli Colonies Found: {counter}'  # Use an f-string to insert the variable
-rsktext1 = 'Risk Factor:'
-if counter == 0:
-  rsktext2 = f'SAFE'
-  rsktext_color = (0, 255, 0)  # Green color in BGR format
-elif 1<=counter<=10:
-  rsktext2 = f'LOW'
-  rsktext_color = (0, 220, 200)
-elif 10<counter<=100:
-  rsktext2 = f'MEDIUM'
-  rsktext_color = (0, 100, 200)
-elif 100<counter:
-  rsktext2 = f'HIGH'
-  rsktext_color = (0, 0, 255)  # Green color in BGR format
+def generate_histogram_image(areas):
+    fig = px.histogram(areas)
+    # Increase margins so text isn't cut off and the histogram is "zoomed out"
+    fig.update_layout(
+        width=300,
+        height=300,
+        plot_bgcolor='white',
+        xaxis_title='Colony Size (in Pixels)',
+        yaxis_title='Number of colonies',
+        xaxis_range=[min(areas) - 1, max(areas) + 1],
+        margin=dict(l=50, r=50, t=50, b=50),
+        showlegend=False,
+        title="Distribution of colonies"
+    )
+    fig.update_traces(marker_color='palevioletred', name='Colonies')
+    img_bytes = io.BytesIO()
+    fig.write_image(img_bytes, format='png')
+    img_bytes.seek(0)
+    encoded_img = base64.b64encode(img_bytes.read()).decode('utf-8')
+    return encoded_img
 
-# Define the position, font, font scale, text color, and thickness
-idposition = (50,100)
-cntposition = (50, 170)
-rskposition = (50,240)
-rskposition2 = (500,240)
-font = cv2.FONT_HERSHEY_SIMPLEX
-font_scale = 2
-text_color = (255, 0, 0)  # Blue color in BGR format
-thickness = 2
-rskthickness = 7
+def analyze_image_from_bytes(image_bytes, selected_option="Both", resize=False, target_height=800):
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    img = cv.imdecode(nparr, cv.IMREAD_COLOR)
 
-# Get the size of the text to draw a background rectangle
-text_size, _ = cv2.getTextSize(rsktext2, font, font_scale, thickness)
-text_width, text_height = text_size
+    if selected_option == "Both":
+        cropped, output_cbc, output_obc, colony_count, areas = process_image_from_image(
+            img, selected_option, resize, target_height
+        )
+    else:
+        cropped, output_img, colony_count, areas = process_image_from_image(
+            img, selected_option, resize, target_height
+        )
 
-# Calculate the coordinates for the background rectangle
-background_x1 = rskposition2[0] -10
-background_y1 = rskposition2[1] - text_height -10  # Adjusted for the text height
-background_x2 = rskposition2[0] + text_width +10
-background_y2 = rskposition[1] + 10
+    def encode_image(image):
+        _, buffer = cv.imencode('.png', image)
+        return base64.b64encode(buffer).decode('utf-8')
 
-# Create a copy of the image to overlay the rectangle
-image_with_rectangle = marked_img.copy()
+    if selected_option == "Both":
+        cropped_encoded = encode_image(cropped)
+        cbc_encoded = encode_image(output_cbc)
+        obc_encoded = encode_image(output_obc)
+        histogram_encoded = generate_histogram_image(areas)
 
-# Draw a semi-transparent rectangle as the background for the text
-alpha = 0.3  # Adjust transparency here (0.0 - fully transparent, 1.0 - fully opaque)
-rectangle_color = (10, 10, 10)
-cv2.rectangle(image_with_rectangle, (background_x1, background_y1), (background_x2, background_y2), rectangle_color, -1)  # Negative thickness creates a filled rectangle
+        images_list = [cropped_encoded, cbc_encoded, histogram_encoded, obc_encoded]
+    else:
+        cropped_encoded = encode_image(cropped)
+        output_encoded = encode_image(output_img)
+        histogram_encoded = generate_histogram_image(areas)
+        images_list = [cropped_encoded, output_encoded, histogram_encoded]
 
-# Blend the image with the rectangle onto the original image
-image_with_highlighted_text = cv2.addWeighted(marked_img, 1 - alpha, image_with_rectangle, alpha, 0)
+    return {
+        "colony_count": colony_count,
+        "risk_level": "SAFE" if colony_count == 0 else (
+            "LOW RISK" if colony_count == 1 else (
+                "MODERATE RISK" if 2 <= colony_count <= 9 else "HIGH RISK"
+            )
+        ),
+        "areas": areas,
+        "images": images_list
+    }
 
-
-# Use cv2.putText() to write text with the variable on the image
-image_with_id = cv2.putText(image_with_highlighted_text, client_ID + '--' + water_source, idposition, font, font_scale, text_color, thickness)
-image_with_cnt = cv2.putText(image_with_id, cntext, cntposition, font, font_scale, text_color, thickness)
-image_with_rsk1 = cv2.putText(image_with_cnt, rsktext1, rskposition, font, font_scale, text_color, thickness)
-image_with_rsk = cv2.putText(image_with_rsk1, rsktext2, rskposition2, font, font_scale, rsktext_color, rskthickness)
-
-# Display the image with text
-plt.figure(figsize=(12,6))
-plt.subplot(1,2,1), plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB)), plt.title('Original'), plt.axis('off')
-plt.subplot(1,2,2), plt.imshow(cv2.cvtColor(image_with_rsk, cv2.COLOR_BGR2RGB)), plt.title('Colonies Identified'), plt.axis('off')
-plt.show()
-
-
-
-
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python water_analysis.py <image_path>")
+        sys.exit(1)
+    image_path = sys.argv[1]
+    img = cv.imread(image_path, cv.IMREAD_COLOR)
+    cropped, output_img, colony_count, areas = process_image_from_image(img, "Both", resize=False, target_height=800)
+    print("Colony count:", colony_count)
+    cv.imwrite("output.png", output_img)
