@@ -66,7 +66,7 @@ class _SwipePagesState extends State<SwipePages> {
       return;
     }
 
-    // ✅ Reload the JSON from the local file
+    //Reload the JSON from the local file
     await _loadUniqueIds();
 
     // Find the user based on the updated list
@@ -151,14 +151,14 @@ class _SwipePagesState extends State<SwipePages> {
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.only(top: 128),
+              padding: const EdgeInsets.only(top: 80),
               child: Image.asset('assets/logo_with_text.png'),
             ),
           ),
 
           Positioned(
-            top: 360,
-            left: MediaQuery.of(context).size.width / 2 - 90,
+            top: 180,
+            left: MediaQuery.of(context).size.width / 2 - 100,
             child: Text(
               'Put Your Unique ID Here: ',
               style: TextStyle(
@@ -168,8 +168,11 @@ class _SwipePagesState extends State<SwipePages> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.center,
+
+          Positioned(
+            top: 230,
+            left: MediaQuery.of(context).size.width / 2 - 200,
+            width: 400,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: TextField(
@@ -177,7 +180,8 @@ class _SwipePagesState extends State<SwipePages> {
                   userInput = value;
                 },
                 decoration: InputDecoration(
-                  hintText: 'Unique ID',
+                  //hintText: 'Unique ID',
+                  labelText: 'Unique ID',
                   border: const OutlineInputBorder(),
                   errorText: errorMessage,
                 ),
@@ -185,8 +189,9 @@ class _SwipePagesState extends State<SwipePages> {
             ),
           ),
 
-          Align(
-            alignment: Alignment.center,
+          Positioned(
+            top: 170,
+            left: MediaQuery.of(context).size.width / 2 - 60,
             child: Padding(
               padding: const EdgeInsets.only(top: 140),
 
@@ -277,7 +282,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String monthYearPart =
         "${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}"; // MMYY format
 
-    // ✅ Load existing users from local file (NOT assets)
+    // Load existing users from local file (NOT assets)
     List<dynamic> jsonList = await _readJson();
 
     // Calculate the next client number
@@ -300,55 +305,69 @@ class _SignUpPageState extends State<SignUpPage> {
 
     jsonList.add(newUser);
 
-    // ✅ Write updated list to local file
+    // Write updated list to local file
     await _writeJson(jsonList);
 
     print("New User Added: $newUser");
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 128),
-                child: Image.asset('assets/logo.png'),
-              ),
+      body: Stack(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.topCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 80),
+              child: Image.asset('assets/logo_with_text.png'),
             ),
-            const SizedBox(height: 60),
-            Text(
+          ),
+          Positioned(
+            top: 180,
+            left: MediaQuery.of(context).size.width / 2 - 140,
+            child: Text(
               "Don't have an ID yet? Sign up here:",
               style: TextStyle(
                 fontSize: 18,
-                //fontWeight: FontWeight.w500,
                 fontFamily: 'Verdana',
                 color: Theme.of(context).primaryColor,
               ),
             ),
-            const SizedBox(height: 45),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'First & Last Name',
-                border: const OutlineInputBorder(),
-                errorText: errorMessage, // Show error message here
+          ),
+         Positioned(
+            top: 230,
+            left: MediaQuery.of(context).size.width / 2 - 200,
+            width: 400,
+            child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'First & Last Name',
+                  border: const OutlineInputBorder(),
+                  errorText: errorMessage, // Show error message here
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-
-            if (generatedId != null)
-              Text(
+          ),
+          if (generatedId != null)
+            Positioned(
+              top: 170,
+              left: MediaQuery.of(context).size.width / 2 - 200,
+              width: 400,
+              child: Text(
                 "Generated ID: $generatedId",
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.green),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
               ),
-
-            ElevatedButton(
+            ),
+        Positioned(
+            top: 305,
+            left: MediaQuery.of(context).size.width / 2 - 60,
+            child: ElevatedButton(
               onPressed: _generateUniqueId,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -357,8 +376,8 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: const Text('Register'),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
