@@ -12,8 +12,8 @@ SQLAlchemy==2.0.38
 
 # Image processing
 opencv-python==4.11.0.86
-numpy==2.0.2
 pillow==11.1.0
+numpy==2.2.0
 
 # Utilities
 tqdm==4.67.1
@@ -28,8 +28,7 @@ python-dotenv==1.0.1  # If using an .env file for config
 flask-cors==5.0.1
 gunicorn==23.0.0
 
-# Water analysis
+# Graph Generation
 numpy==2.2.0
-opencv-python==4.8.1.78
 plotly==6.0.1
 
