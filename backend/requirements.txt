@@ -24,3 +24,7 @@ urllib3==2.3.0
 rich==13.9.4
 python-dotenv==1.0.1  # If using an .env file for config
 
+# Hosting
+gunicorn==20.1.0
+
+

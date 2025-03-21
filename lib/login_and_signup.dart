@@ -26,7 +26,6 @@ class _SwipePagesState extends State<SwipePages> {
     _loadUniqueIds(); // Load JSON data when the app starts
   }
 
-
   // Function to load unique IDs from the JSON file
   Future<File> _getLocalFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -66,7 +65,7 @@ class _SwipePagesState extends State<SwipePages> {
       return;
     }
 
-    //Reload the JSON from the local file
+    // Reload the JSON from the local file
     await _loadUniqueIds();
 
     // Find the user based on the updated list
@@ -88,32 +87,95 @@ class _SwipePagesState extends State<SwipePages> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => WelcomePage(userJson: userJson), //userJson: userJson
+          builder: (context) => WelcomePage(userJson: userJson),
         ),
       );
     }
   }
 
-
   void _onPageChanged(int index) {
     setState(() {
       _currentPage = index;
     });
+  }
 
+  // Build login page content (without its own Scaffold)
+  Widget _buildLoginPageContent() {
+    return Stack(
+      children: <Widget>[
+        // Logo at the top
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 128),
+            child: Image.asset('assets/logo_with_text.png'),
+          ),
+        ),
+        // Label for the text field
+        Positioned(
+          top: 360,
+          left: MediaQuery.of(context).size.width / 2 - 90,
+          child: Text(
+            'Put Your Unique ID Here: ',
+            style: TextStyle(
+              fontSize: 18,
+              fontFamily: 'Verdana',
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
+        // Unique ID text field
+        Align(
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: TextField(
+              onChanged: (value) {
+                userInput = value;
+              },
+              // Disable interactive selection to remove the extra toolbar
+              enableInteractiveSelection: false,
+              decoration: InputDecoration(
+                hintText: 'Unique ID',
+                border: const OutlineInputBorder(),
+                errorText: errorMessage,
+              ),
+            ),
+          ),
+        ),
+        // Login button
+        Align(
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 140),
+            child: ElevatedButton(
+              onPressed: _validateAndLogin,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              ),
+              child: const Text('Enter'),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Prevents automatic resizing when the keyboard appears
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           PageView(
             controller: _pageController,
             onPageChanged: _onPageChanged,
-            children:<Widget>[
-              _buildLoginPage(),
+            children: <Widget>[
+              _buildLoginPageContent(),
               const SignUpPage(),
-
             ],
           ),
           Positioned(
@@ -123,120 +185,37 @@ class _SwipePagesState extends State<SwipePages> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(2, (index) {
                 return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 5),
-                    height: 10,
-                    width: 10,
-                    decoration: BoxDecoration(
-                      color: _currentPage == index
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey,
-                      shape: BoxShape.circle,
-                    )
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                  height: 10,
+                  width: 10,
+                  decoration: BoxDecoration(
+                    color: _currentPage == index
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
                 );
-              })
-
-              ,)
-            ,)
-        ]
-        ,),
-    );
-
-  }
-
-  Widget _buildLoginPage() {
-    return Scaffold(
-      body: Stack(
-        //mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 80),
-              child: Image.asset('assets/logo_with_text.png'),
+              }),
             ),
           ),
-
-          Positioned(
-            top: 180,
-            left: MediaQuery.of(context).size.width / 2 - 100,
-            child: Text(
-              'Put Your Unique ID Here: ',
-              style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'Verdana',
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-
-          Positioned(
-            top: 230,
-            left: MediaQuery.of(context).size.width / 2 - 200,
-            width: 400,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: TextField(
-                onChanged: (value){
-                  userInput = value;
-                },
-                decoration: InputDecoration(
-                  //hintText: 'Unique ID',
-                  labelText: 'Unique ID',
-                  border: const OutlineInputBorder(),
-                  errorText: errorMessage,
-                ),
-              ),
-            ),
-          ),
-
-          Positioned(
-            top: 170,
-            left: MediaQuery.of(context).size.width / 2 - 60,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 140),
-
-              child: ElevatedButton(
-                onPressed: _validateAndLogin,
-
-                // Navigator.pushReplacement(
-                //   context,
-                //   MaterialPageRoute(builder: (context) => const HomePage())
-                // );
-                //On pressed currently skips straight to homepage
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                ),
-                child: const Text('Enter'
-                ),
-              ),
-
-            ),
-
-
-          )
         ],
       ),
     );
   }
 }
 
-// SignUpPage for now
+// SignUpPage widget without its own Scaffold to avoid conflicts,
+// and with a SingleChildScrollView to prevent overflow when the keyboard appears.
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
   @override
   State<SignUpPage> createState() => _SignUpPageState();
 }
 
-
-
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _nameController = TextEditingController();
   String? generatedId;
   String? errorMessage;
-  String? name;
 
   Future<File> _getLocalFile() async {
     final directory = await getApplicationDocumentsDirectory();
@@ -280,14 +259,14 @@ class _SignUpPageState extends State<SignUpPage> {
     // Get current month and year
     DateTime now = DateTime.now();
     String monthYearPart =
-        "${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}"; // MMYY format
+        "${now.month.toString().padLeft(2, '0')}${now.year.toString().substring(2)}";
 
     // Load existing users from local file (NOT assets)
     List<dynamic> jsonList = await _readJson();
 
     // Calculate the next client number
     int clientNumber = jsonList.length + 1;
-    String clientNumberPart = clientNumber.toString().padLeft(3, '0'); // 3-digit
+    String clientNumberPart = clientNumber.toString().padLeft(3, '0');
 
     // Combine all parts to create the unique ID
     String uniqueId = "$lastNamePart$monthYearPart$clientNumberPart";
@@ -311,22 +290,33 @@ class _SignUpPageState extends State<SignUpPage> {
     print("New User Added: $newUser");
   }
 
-@override
+  // Copy generated ID to clipboard with a SnackBar confirmation
+  void _copyToClipboard(String text) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Copied to clipboard!")),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 80),
-              child: Image.asset('assets/logo_with_text.png'),
+    return SingleChildScrollView(
+      // Allows scrolling when keyboard appears
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            // Logo at the top
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 128),
+                child: Image.asset('assets/logo.png'),
+              ),
             ),
-          ),
-          Positioned(
-            top: 180,
-            left: MediaQuery.of(context).size.width / 2 - 140,
-            child: Text(
+            const SizedBox(height: 60),
+            Text(
               "Don't have an ID yet? Sign up here:",
               style: TextStyle(
                 fontSize: 18,
@@ -334,40 +324,34 @@ class _SignUpPageState extends State<SignUpPage> {
                 color: Theme.of(context).primaryColor,
               ),
             ),
-          ),
-         Positioned(
-            top: 230,
-            left: MediaQuery.of(context).size.width / 2 - 200,
-            width: 400,
-            child: Padding(padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'First & Last Name',
-                  border: const OutlineInputBorder(),
-                  errorText: errorMessage, // Show error message here
-                ),
+            const SizedBox(height: 45),
+            // Name input field
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'First & Last Name',
+                border: const OutlineInputBorder(),
+                errorText: errorMessage,
               ),
             ),
-          ),
-          if (generatedId != null)
-            Positioned(
-              top: 170,
-              left: MediaQuery.of(context).size.width / 2 - 200,
-              width: 400,
-              child: Text(
-                "Generated ID: $generatedId",
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
+            const SizedBox(height: 20),
+            // Display generated ID which is tappable to copy
+            if (generatedId != null)
+              GestureDetector(
+                onTap: () => _copyToClipboard(generatedId!),
+                child: Text(
+                  "Generated ID: $generatedId\n(Tap to copy)",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
                 ),
               ),
-            ),
-        Positioned(
-            top: 305,
-            left: MediaQuery.of(context).size.width / 2 - 60,
-            child: ElevatedButton(
+            const SizedBox(height: 20),
+            // Register button
+            ElevatedButton(
               onPressed: _generateUniqueId,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
@@ -376,8 +360,8 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               child: const Text('Register'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

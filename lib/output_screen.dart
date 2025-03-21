@@ -35,7 +35,7 @@ class _WaterQualityOutputScreenState extends State<WaterQualityOutputScreen> {
         bytes = await File(widget.imagePath!).readAsBytes();
         print("✅ Image loaded from file");
       } else {
-        final byteData = await rootBundle.load('assets/R-cardSample2.jpg');
+        final byteData = await rootBundle.load('assets/rcard.png'); // R-cardSample2.jpg
         bytes = byteData.buffer.asUint8List();
         print("✅ Test image loaded from assets");
       }

@@ -54,3 +54,5 @@ backend/*.jpg
 backend/water_analysis.py
 
 .qodo
+
+android/app/.cxx
