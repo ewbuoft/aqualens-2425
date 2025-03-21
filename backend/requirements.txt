@@ -32,4 +32,6 @@ gunicorn==23.0.0
 numpy==2.2.0
 plotly==6.0.1
 pandas==2.2.3
+kaleido==0.2.1.post1
+
 
