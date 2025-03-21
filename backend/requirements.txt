@@ -28,4 +28,8 @@ python-dotenv==1.0.1  # If using an .env file for config
 flask-cors==5.0.1
 gunicorn==23.0.0
 
+# Water analysis
+numpy==2.2.0
+opencv-python==4.8.1.78
+plotly==6.0.1
 

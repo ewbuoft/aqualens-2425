@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-import cv2
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
