@@ -116,7 +116,7 @@ class _SwipePagesState extends State<SwipePages> {
           top: 360,
           left: MediaQuery.of(context).size.width / 2 - 90,
           child: Text(
-            'Put Your Unique ID Here: ',
+            'Enter Your Unique ID Here: ',
             style: TextStyle(
               fontSize: 18,
               fontFamily: 'Verdana',
