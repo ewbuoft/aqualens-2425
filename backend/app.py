@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from flask_cors import CORS
-from water_analysis import analyze_image_from_bytes
+from backend.water_analysis import analyze_image_from_bytes
 
 load_dotenv()  # Load environment variables from .env file
 
