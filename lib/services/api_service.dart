@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = "https://aqualens-2425.onrender.com";
+  static const String baseUrl = "https://lluvialens.onrender.com";
 
   // Analyzes image using memory-based bytes and userId
   static Future<Map<String, dynamic>?> analyzeImageFromBytes(Uint8List imageBytes, String userId) async {
